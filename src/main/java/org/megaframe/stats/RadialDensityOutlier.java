@@ -8,12 +8,25 @@ import static java.lang.Math.sqrt;
  * N dimensional set of double's. ArrayList is used to
  * pacakge the data so it can be any size
  * @author Saul Rosa
+ * @version 1
  */
 public class RadialDensityOutlier {
+  /** Change step minimum on K-Means convergance */
   private double delta = 0.0001;
+  /** Main Function of the outlier detection
+   * @param list ArrayList of N dimensional double[], all vectors must be the same size
+   *             Each list item is one point, with it's axis defined by the array double[]
+   * @param rsigma Radial sigma distance to set as threshold for coulding neighbors
+   *        radial_limit = average_distance_to_closest_neighbor + mu_of_neighbor_distances * rsigma
+   * @param minNeighbors int minimum number of neighbors to not be an outlier
+   * @param ksets int number of K-Means clusters to run
+   */
   public int[] categorize(ArrayList list, double rsigma, double minNeighbors, int ksets ) throws IllegalArgumentException {
-    
+    // Test Requirments of data set and throw errors were needed
     if(list.size() == 0){ throw new IllegalArgumentException("Data set cannot be empty."); }
+    if(ksets < 1){ throw new IllegalArgumentException("Number of K-Means clusters must be at least 1."); }
+    if(minNeighbors < 1){ throw new IllegalArgumentException("Number of minimum neighbors must be at least 1."); }
+    
     int dimensions = 0;
     for (int i = 0; i < list.size(); i++) {
       double[] vector = (double[])list.get(i);
