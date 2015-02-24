@@ -1,38 +1,31 @@
 package org.megaframe.stats;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
- * Unit test for simple App.
+ * Unit test for rdod - Radial Density Outlier
+ * @author Saul Rosa
  */
-public class RadialDensityOutlierTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public RadialDensityOutlierTest ( String testName )
-    {
-        super( testName );
-    }
+public class RadialDensityOutlierTest {
+  private static rdod = new RadialDensityOutlier();
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( RadialDensityOutlierTest.class );
-    }
-
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
-    }
+  /**
+   * Test the radial distance calculation
+   */
+  @Test
+  public void testDistance(){
+    double[] vecA = {1,1};
+    double[] vecB = {0,0};
+    double result = 1; 
+    assertEquals("Radial Distance computes as 1.0", result, rdod.distance(vecA,vecB);
+  }
 }

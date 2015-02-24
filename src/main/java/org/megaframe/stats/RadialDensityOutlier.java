@@ -21,19 +21,27 @@ public class RadialDensityOutlier {
    * @param minNeighbors int minimum number of neighbors to not be an outlier
    * @param ksets int number of K-Means clusters to run
    */
-  public int[] categorize(ArrayList list, double rsigma, double minNeighbors, int ksets ) throws IllegalArgumentException {
+  public int[] categorize(
+      ArrayList list, double rsigma, double minNeighbors, int ksets )
+    throws IllegalArgumentException {
+
     // Test Requirments of data set and throw errors were needed
-    if(list.size() == 0){ throw new IllegalArgumentException("Data set cannot be empty."); }
-    if(ksets < 1){ throw new IllegalArgumentException("Number of K-Means clusters must be at least 1."); }
-    if(minNeighbors < 1){ throw new IllegalArgumentException("Number of minimum neighbors must be at least 1."); }
+    if(list.size() == 0){
+      throw new IllegalArgumentException("Data set cannot be empty."); }
+    if(ksets < 1){
+      throw new IllegalArgumentException("Number of K-Means clusters must be at least 1."); }
+    if(minNeighbors < 1){
+      throw new IllegalArgumentException("Number of minimum neighbors must be at least 1."); }
     
     int dimensions = 0;
     for (int i = 0; i < list.size(); i++) {
       double[] vector = (double[])list.get(i);
       if(dimensions == 0){ dimensions = vector.length; }
-      else if (dimensions != vector.length){ throw new IllegalArgumentException("All vectors must have the same dimensions."); }
+      else if (dimensions != vector.length){
+        throw new IllegalArgumentException("All vectors must have the same dimensions."); }
     }
-    if(dimensions == 0){ throw new IllegalArgumentException("Vectors must have 1 or more dimenstions."); }
+    if(dimensions == 0){
+      throw new IllegalArgumentException("Vectors must have 1 or more dimenstions."); }
 
     int[] category = new int[list.size()];
     ArrayList clusterCenter = new ArrayList();
@@ -41,14 +49,7 @@ public class RadialDensityOutlier {
     // Collect scaling info per dimension
     double[] max = new double[dimensions];
     double[] min = new double[dimensions];
-    for (int j = 0; j < dimensions; j++){ min[j] = 1; }
-    for (int i = 0; i < list.size(); i++) {
-      double[] vector = (double[])list.get(i);
-      for (int j = 0; j < vector.length; j++){
-        if(max[j] < vector[j]){ max[j] = vector[j]; }
-        if(min[j] > vector[j]){ min[j] = vector[j]; }
-      }
-    }
+    findMaxMin(max,min,list,dimensions);
 
     // Scale local dataset 0.0-1.0
     int saveVector = 1;
@@ -154,6 +155,17 @@ public class RadialDensityOutlier {
   public void setDelta(double updateDelta) throws IllegalArgumentException {
     if(updateDelta <= 0){ throw new IllegalArgumentException("Delta must be greater than 0."); }
     delta = updateDelta;
+  }
+
+  private void findMaxMin(double[] max, double[] min, ArrayList list, int dimensions){
+    for (int j = 0; j < dimensions; j++){ min[j] = 1; }
+    for (int i = 0; i < list.size(); i++) {
+      double[] vector = (double[])list.get(i);
+      for (int j = 0; j < vector.length; j++){
+        if(max[j] < vector[j]){ max[j] = vector[j]; }
+        if(min[j] > vector[j]){ min[j] = vector[j]; }
+      }
+    }
   }
 
   private double distance(double[] vecA, double[] vecB){
