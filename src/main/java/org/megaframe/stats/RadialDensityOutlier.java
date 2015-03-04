@@ -45,15 +45,18 @@ public class RadialDensityOutlier {
 
     // Find Median Radial distances for all points
     double[] closestNeighbor = new double[list.size()];
-    int unset = 1;
+    boolean unset = true; // Used to track if the base distance was set
+
     for (int i = 0; i < list.size(); i++) {
       for (int k = 0; k < list.size(); k++) {
         if(i == k){ continue; }
         double test_distance = _distance((double[])list.get(i),(double[])list.get(k));
-        if(unset == 1){ closestNeighbor[i] = test_distance; unset++; }
+        if(unset == true){ closestNeighbor[i] = test_distance; unset = false; }
         else if(test_distance < closestNeighbor[i]){ closestNeighbor[i] = test_distance; }
       }
+      unset = true; //Rest for the next vector
     }
+    
     // Set a Maximum distance range
     double avg = average(closestNeighbor);
     double mu = sigma(closestNeighbor);
@@ -64,8 +67,9 @@ public class RadialDensityOutlier {
       // Find number of neighbers inside Maximum distance
       int neighbors = 0;
       for (int k = 0; k < list.size(); k++) {
-        if(i == k){ continue; }
-        if(_distance((double[])list.get(i),(double[])list.get(k)) < maxDistanceLimit){ neighbors++; }
+        if(i == k){ continue; } // Skip on self
+        double dist = _distance((double[])list.get(i),(double[])list.get(k));
+        if(dist < maxDistanceLimit){ neighbors++; }
       }
       // Outlier if Sub minimum number
       if(neighbors < minNeighbors){ category[i] = 1; }

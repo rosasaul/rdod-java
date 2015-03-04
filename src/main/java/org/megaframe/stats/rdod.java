@@ -27,7 +27,7 @@ import java.util.Hashtable;
 public class rdod {
 
   // Setup CLI Options
-  @Option(name="-o",usage="output to this file",metaVar="OUTPUT")
+  @Option(name="-output",usage="output to this file",metaVar="OUTPUT")
   private String output;
 
   @Option(name="-match",usage="Regex string match for columns to use",metaVar="REGEX")
@@ -44,6 +44,9 @@ public class rdod {
 
   @Option(name="-ksets",usage="Number of K-Means groups to form, no default",metaVar="KSETS")
   private int ksets = 0;
+
+  @Option(name="-itter",usage="Number of Itterations to loop, 0 is infinite, default 0",metaVar="ITTER")
+  private int itter = 0;
 
   // receives other command line parameters than options
   @Argument
@@ -88,6 +91,7 @@ public class rdod {
     }
 
     RadialDensityOutlier rdod = new RadialDensityOutlier();
+    rdod.itter(itter);
     int[] categories = rdod.categorize(data,rsigma,neighbors,ksets);
 
     // Print the returned categories
@@ -97,23 +101,6 @@ public class rdod {
     }
 
     if(output != null){ ps.close(); }
-  }
-
-  private ArrayList readFile(String input){
-    ArrayList data = new ArrayList();
-    try {
-      BufferedReader reader = new BufferedReader(new FileReader(input));
-      String line = reader.readLine();
-      while ((line = reader.readLine()) != null){
-        //records.add(line);
-      }
-      reader.close();
-    } catch(Exception e) {
-      System.err.format("Exception occurred trying to read '%s'.", input);
-      System.err.println("Error : " + e.getMessage());
-      System.exit(0);
-    }
-    return data;
   }
 }
 
@@ -140,14 +127,15 @@ class csvReader {
 
     String line;
     while ((line = reader.readLine()) != null){
+      origLines.add(line);
       double[] vector = new double[matchedCols.size()];
       String[] items = line.split(",");
       int i = 0;
       for(String col : matchedCols){
         vector[i] = Double.parseDouble( items[ header.get(col) ] );
-        data.add(vector);
         i++;
       }
+      data.add(vector);
     }
     return data;
   }
