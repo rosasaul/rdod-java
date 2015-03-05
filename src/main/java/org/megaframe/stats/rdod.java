@@ -27,6 +27,9 @@ import java.util.Hashtable;
 public class rdod {
 
   // Setup CLI Options
+  @Option(name="-help",usage="Print This Help Menu")
+  private boolean help;
+  
   @Option(name="-output",usage="output to this file",metaVar="OUTPUT")
   private String output;
 
@@ -60,10 +63,12 @@ public class rdod {
     CmdLineParser parser = new CmdLineParser(this);
     try {
       parser.parseArgument(args);
-      if( inputFiles.isEmpty() ){
-        throw new CmdLineException(parser,"No arguments is given"); }
+      if( help ){
+        throw new CmdLineException(parser,"Help Menu"); }
       if( ksets == 0 ){
         throw new CmdLineException(parser,"ksets must be set to an integer greater than 0"); }
+      if( inputFiles.isEmpty() ){
+        throw new CmdLineException(parser,"No arguments is given"); }
 
     } catch( CmdLineException e ) {
       System.err.println(e.getMessage());
