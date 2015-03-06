@@ -11,30 +11,44 @@ import static java.lang.Math.sqrt;
  * @version 1
  */
 public class RadialDensityOutlier {
+  
   /** Change step minimum on K-Means convergance */
-  private double delta = 0.0001;
+  private double delta = 0;
+  
   /** Number of itterations before stopping K-Means convergance, 0 is infinite */
   private int itter = 0;
+  
+  /** int number of K-Means clusters to run */
+  private int ksets = 0;
+  
+  /** int minimum number of neighbors to not be an outlier */
+  private int neighbors = 0;
+  
+  /** Radial sigma distance to set as threshold for coulding neighbors
+   * radial_limit = average_distance_to_closest_neighbor + mu_of_neighbor_distances * rsigma
+   */
+  private double rsigma = 0;
+  
+  /** Overide computed rsigma and use a hard set value from 0-sqrt(2) ~0-1.414 */
+  private double rdist = 0;
   
   /** Main Function of the outlier detection
    * @param list ArrayList of N dimensional double[], all vectors must be the same size
    *             Each list item is one point, with it's axis defined by the array double[]
-   * @param rsigma Radial sigma distance to set as threshold for coulding neighbors
-   *        radial_limit = average_distance_to_closest_neighbor + mu_of_neighbor_distances * rsigma
-   * @param minNeighbors int minimum number of neighbors to not be an outlier
-   * @param ksets int number of K-Means clusters to run
    */
-  public int[] categorize(
-      ArrayList list, double rsigma, double minNeighbors, int ksets )
-    throws IllegalArgumentException {
+  public int[] categorize(ArrayList list) throws IllegalArgumentException {
 
     // Test Requirments of data set and throw errors were needed
     if(list.size() == 0){
       throw new IllegalArgumentException("Data set cannot be empty."); }
     if(ksets < 1){
       throw new IllegalArgumentException("Number of K-Means clusters must be at least 1."); }
-    if(minNeighbors < 1){
+    if(neighbors < 1){
       throw new IllegalArgumentException("Number of minimum neighbors must be at least 1."); }
+    if(delta <= 0){
+      throw new IllegalArgumentException("delta must be a number larger than 0."); }
+    if(rdist < 0){
+      throw new IllegalArgumentException("radial distance cannot be less than 0."); }
     
     int dimensions = vectorDimensions(list);
 
@@ -58,21 +72,27 @@ public class RadialDensityOutlier {
     }
     
     // Set a Maximum distance range
-    double avg = average(closestNeighbor);
-    double mu = sigma(closestNeighbor);
-    double maxDistanceLimit = avg + (mu * rsigma);
+    double avg = 0; double mu = 0; double maxDistanceLimit = 0;
+    if(rdist == 0){
+      avg = average(closestNeighbor);
+      mu = sigma(closestNeighbor,avg);
+      maxDistanceLimit = avg + (mu * rsigma);
+    }
 
     // Loop on all points
     for (int i = 0; i < list.size(); i++) {
       // Find number of neighbers inside Maximum distance
-      int neighbors = 0;
+      int neighbors_count = 0;
       for (int k = 0; k < list.size(); k++) {
         if(i == k){ continue; } // Skip on self
         double dist = _distance((double[])list.get(i),(double[])list.get(k));
-        if(dist < maxDistanceLimit){ neighbors++; }
+        if(rdist == 0){
+          if(dist < maxDistanceLimit){ neighbors_count++; }
+        }
+        else if(dist < rdist){ neighbors_count++; }
       }
       // Outlier if Sub minimum number
-      if(neighbors < minNeighbors){ category[i] = 1; }
+      if(neighbors_count < neighbors){ category[i] = 1; }
       // Find distances to each K-Means center
       else{
         int cluster = 0;
@@ -169,25 +189,70 @@ public class RadialDensityOutlier {
   }
 
   /** Get the set value of delta, used to determing Clusters are no longer moving */
-  public double delta(){ return this.delta; }
+  public double get_delta(){ return this.delta; }
 
   /** Set the value of delta, used to determing Clusters are no longer moving
    * @param delta double value to be used instead of default delta
    */
-  public double delta(double delta){
+  public RadialDensityOutlier delta(double delta){
     this.delta = delta;
-    return this.delta;
+    return this;
   }
 
   /** Get the number of itterations the convergance loop will run */
-  public int itter(){ return this.itter; }
+  public int get_itter(){ return this.itter; }
 
   /** Set the number of itterations the convergance loop will run
    * @param itter interger number of steps to run, 0 is infinite, default 0
    */
-  public int itter(int itter){
+  public RadialDensityOutlier itter(int itter){
     this.itter = itter;
-    return this.itter;
+    return this;
+  }
+
+  /** Get the set value of minimum neighbors, used to which vectors are outliers */
+  public int get_neighbors(){ return this.neighbors; }
+
+  /** Set the value of minimum neighbors, used to which vectors are outliers 
+   * @param neighbors int count of minimum neighbors
+   */
+  public RadialDensityOutlier neighbors(int neighbors){
+    this.neighbors = neighbors;
+    return this;
+  }
+
+  /** Get the set value of ksets, used to number of K-Means Clusters to converge on */
+  public int get_ksets(){ return this.ksets; }
+
+  /** Set the value of ksets, used to number of K-Means Clusters to converge on
+   * @param ksets int count of K-Means Clusters
+   */
+  public RadialDensityOutlier ksets(int ksets){
+    this.ksets = ksets;
+    return this;
+  }
+
+  /** Get the set value of radial sigma, sets the number of sigma from the mean neighbor distance to count neighbors */
+  public double get_rsigma(){ return this.rsigma; }
+
+  /** Set the value of radial sigma, sets the number of sigma from the mean neighbor distance to count neighbors
+   * @param delta double radial sigma distances from closest neighbor
+   */
+  public RadialDensityOutlier rsigma(double rsigma){
+    this.rsigma = rsigma;
+    return this;
+  }
+
+  /** Get the set value of radial distance limit, overides rsigma and sets a hard value for neighbor counting */
+  public double get_rdist(){ return this.rdist; }
+
+  /** Set the value of radial distance limit, overides rsigma and sets a hard value for neighbor counting
+   * because of Normalization the number should be between 0-sqrt(2) ~0-1.414
+   * @param delta double radial distance limit to count neighbors
+   */
+  public RadialDensityOutlier rdist(double rdist){
+    this.rdist = rdist;
+    return this;
   }
 
   /** Normalize the vector and return center points for cluster convergence.
@@ -263,10 +328,10 @@ public class RadialDensityOutlier {
 
   /** Compute the standard deviation (sigma) of a data set
    * @param vector set of double numbers
+   * @param avg value of the average from passed vector
    * @return double sigma
    */
-  private double sigma(double[] vector){
-    double avg = average(vector);
+  private double sigma(double[] vector, double avg){
     double sum = 0;
     for(int i = 0; i < vector.length; i++){
       sum += ((vector[i] - avg) * (vector[i] - avg));

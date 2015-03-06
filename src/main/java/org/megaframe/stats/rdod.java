@@ -51,6 +51,9 @@ public class rdod {
   @Option(name="-itter",usage="Number of Itterations to loop, 0 is infinite, default 0",metaVar="ITTER")
   private int itter = 0;
 
+  @Option(name="-delta",usage="Delta change limit when to stop K-Means search, default 0.0001",metaVar="DELTA")
+  private double delta = 0.0001;
+
   // receives other command line parameters than options
   @Argument
   private List<String> inputFiles = new ArrayList<String>();
@@ -95,9 +98,15 @@ public class rdod {
       return;
     }
 
+    // Create New RadialDensityOutlier Object
     RadialDensityOutlier rdod = new RadialDensityOutlier();
-    rdod.itter(itter);
-    int[] categories = rdod.categorize(data,rsigma,neighbors,ksets);
+
+    // Setup configurations
+    rdod.itter(itter).neighbors(neighbors).ksets(ksets).rsigma(rsigma).delta(delta);
+    if(rdist > 0){ rdod.rdist(rdist); } // RadialDensityOutlier will default to use rdistance when it's hard set
+
+    // Run Categorization Process
+    int[] categories = rdod.categorize(data);
 
     // Print the returned categories
     System.out.println("Category," + csv.getHeader());
