@@ -68,10 +68,10 @@ public class rdod {
       parser.parseArgument(args);
       if( help ){
         throw new CmdLineException(parser,"Help Menu"); }
+      if( inputFiles.isEmpty() ){
+        throw new CmdLineException(parser,"No Input File is given"); }
       if( ksets == 0 ){
         throw new CmdLineException(parser,"ksets must be set to an integer greater than 0"); }
-      if( inputFiles.isEmpty() ){
-        throw new CmdLineException(parser,"No arguments is given"); }
 
     } catch( CmdLineException e ) {
       System.err.println(e.getMessage());

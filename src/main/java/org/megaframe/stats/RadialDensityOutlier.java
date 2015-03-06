@@ -57,23 +57,25 @@ public class RadialDensityOutlier {
 
     vectorNormalize(list,dimensions,clusterCenter,ksets);
 
-    // Find Median Radial distances for all points
-    double[] closestNeighbor = new double[list.size()];
-    boolean unset = true; // Used to track if the base distance was set
-
-    for (int i = 0; i < list.size(); i++) {
-      for (int k = 0; k < list.size(); k++) {
-        if(i == k){ continue; }
-        double test_distance = _distance((double[])list.get(i),(double[])list.get(k));
-        if(unset == true){ closestNeighbor[i] = test_distance; unset = false; }
-        else if(test_distance < closestNeighbor[i]){ closestNeighbor[i] = test_distance; }
-      }
-      unset = true; //Rest for the next vector
-    }
-    
-    // Set a Maximum distance range
+    // Variables used for rsigma
     double avg = 0; double mu = 0; double maxDistanceLimit = 0;
-    if(rdist == 0){
+
+    if(rdist == 0){ //rdist overides rsigma so skip this
+      
+      // Find Median Radial distances for all points
+      double[] closestNeighbor = new double[list.size()];
+      boolean unset = true; // Used to track if the base distance was set
+      for (int i = 0; i < list.size(); i++) {
+        for (int k = 0; k < list.size(); k++) {
+          if(i == k){ continue; }
+          double test_distance = _distance((double[])list.get(i),(double[])list.get(k));
+          if(unset == true){ closestNeighbor[i] = test_distance; unset = false; }
+          else if(test_distance < closestNeighbor[i]){ closestNeighbor[i] = test_distance; }
+        }
+        unset = true; //Rest for the next vector
+      }
+      
+      // Set a Maximum distance range
       avg = average(closestNeighbor);
       mu = sigma(closestNeighbor,avg);
       maxDistanceLimit = avg + (mu * rsigma);
