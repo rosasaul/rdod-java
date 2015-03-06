@@ -80,6 +80,7 @@ public class RadialDensityOutlier {
       mu = sigma(closestNeighbor,avg);
       maxDistanceLimit = avg + (mu * rsigma);
     }
+    else{ maxDistanceLimit = rdist; }
 
     // Loop on all points
     for (int i = 0; i < list.size(); i++) {
@@ -88,10 +89,7 @@ public class RadialDensityOutlier {
       for (int k = 0; k < list.size(); k++) {
         if(i == k){ continue; } // Skip on self
         double dist = _distance((double[])list.get(i),(double[])list.get(k));
-        if(rdist == 0){
-          if(dist < maxDistanceLimit){ neighbors_count++; }
-        }
-        else if(dist < rdist){ neighbors_count++; }
+        if(dist < maxDistanceLimit){ neighbors_count++; }
       }
       // Outlier if Sub minimum number
       if(neighbors_count < neighbors){ category[i] = 1; }
