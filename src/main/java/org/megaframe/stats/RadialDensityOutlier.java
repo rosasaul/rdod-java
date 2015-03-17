@@ -320,7 +320,7 @@ public class RadialDensityOutlier {
    * @param vector set of double numbers
    * @return double average
    */
-  private double average(double[] vector){
+  public double average(double[] vector){
     double sum = 0;
     for(int i = 0; i < vector.length; i++){ sum += vector[i]; }
     return sum / vector.length;
@@ -338,6 +338,16 @@ public class RadialDensityOutlier {
     }
     return sqrt(sum / vector.length);
   }
+
+  /** Compute the standard deviation (sigma) of a data set
+   * @param vector set of double numbers
+   * @return double sigma
+   */
+  public double sigma(double[] vector){
+    return sigma(vector,average(vector));
+  }
+
+
 }
 
 
